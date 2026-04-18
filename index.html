@@ -1,0 +1,785 @@
+
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@400;500;600&display=swap');
+  *{box-sizing:border-box;margin:0;padding:0;}
+  :root{--c1:#FF6B2B;--c2:#FF3A5C;--c3:#FFD166;--c4:#06D6A0;--dark:#0D0D0D;--mid:#1A1A1A;--card:#222;--border:#333;--text:#F5F5F0;--muted:#888;}
+  #app{font-family:'DM Sans',sans-serif;background:var(--dark);color:var(--text);min-height:100vh;width:100%;}
+  .screen{display:none;}
+  .screen.active{display:block;}
+  #landing{display:none;min-height:100vh;flex-direction:column;align-items:center;justify-content:center;padding:2rem;text-align:center;position:relative;overflow:hidden;}
+  #landing.active{display:flex;}
+  .grid-bg{position:absolute;inset:0;background-image:linear-gradient(var(--border) 1px,transparent 1px),linear-gradient(90deg,var(--border) 1px,transparent 1px);background-size:40px 40px;opacity:0.22;}
+  .landing-badge{background:var(--c1);color:#fff;font-size:11px;font-weight:600;letter-spacing:0.12em;text-transform:uppercase;padding:6px 16px;border-radius:20px;margin-bottom:1.5rem;display:inline-block;position:relative;z-index:1;}
+  .game-title{font-family:'Bebas Neue',sans-serif;font-size:clamp(60px,13vw,110px);line-height:0.9;position:relative;z-index:1;}
+  .title-main{color:var(--text);}
+  .title-sub{color:var(--c1);}
+  .title-edition{font-family:'Bebas Neue',sans-serif;font-size:clamp(18px,3.5vw,28px);color:var(--c3);letter-spacing:0.15em;position:relative;z-index:1;margin:0.75rem 0 1.5rem;}
+  .landing-sub{font-size:15px;color:var(--muted);max-width:360px;margin:0 auto 2.5rem;line-height:1.6;position:relative;z-index:1;}
+  .btn-primary{background:var(--c1);color:#fff;border:none;font-family:'DM Sans',sans-serif;font-size:15px;font-weight:600;padding:14px 36px;border-radius:8px;cursor:pointer;transition:transform 0.1s,opacity 0.1s;position:relative;z-index:1;}
+  .btn-primary:hover{opacity:0.9;transform:translateY(-1px);}
+  .btn-primary:active{transform:scale(0.98);}
+  .btn-secondary{background:transparent;color:var(--text);border:1px solid var(--border);font-family:'DM Sans',sans-serif;font-size:14px;font-weight:500;padding:12px 28px;border-radius:8px;cursor:pointer;transition:background 0.15s;}
+  .btn-secondary:hover{background:var(--card);}
+  .cat-pills{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;margin-top:2rem;position:relative;z-index:1;}
+  .cat-pill{font-size:11px;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;padding:5px 12px;border-radius:20px;border:1px solid var(--border);color:var(--muted);}
+
+  .setup-container{max-width:580px;margin:0 auto;padding:2rem 1.5rem;}
+  .step-label{font-size:11px;font-weight:600;letter-spacing:0.12em;text-transform:uppercase;color:var(--c1);margin-bottom:0.5rem;}
+  .screen-title{font-family:'Bebas Neue',sans-serif;font-size:42px;letter-spacing:0.03em;margin-bottom:1.5rem;}
+  .team-card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:1.25rem;margin-bottom:1rem;}
+  .team-header{display:flex;align-items:center;gap:10px;margin-bottom:1rem;}
+  .team-color-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0;}
+  .team-label{font-size:11px;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted);}
+  .player-input{display:flex;gap:8px;margin-bottom:8px;}
+  .player-input:last-child{margin-bottom:0;}
+  .player-icon{width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:600;flex-shrink:0;}
+  .inp{flex:1;background:var(--mid);border:1px solid var(--border);border-radius:8px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:14px;padding:8px 12px;outline:none;transition:border-color 0.15s;}
+  .inp:focus{border-color:var(--c1);}
+  .inp::placeholder{color:var(--muted);}
+  .settings-row{display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin:1rem 0;}
+  .setting-block{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:1rem;}
+  .setting-label{font-size:11px;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted);margin-bottom:8px;}
+  .setting-select{width:100%;background:var(--mid);border:1px solid var(--border);border-radius:6px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:14px;padding:8px 10px;outline:none;cursor:pointer;}
+  .cats-block{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:1rem;margin-bottom:1rem;}
+  .cats-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px;}
+  .cat-toggle{display:flex;align-items:center;gap:8px;padding:8px 10px;border-radius:8px;border:1px solid var(--border);cursor:pointer;transition:all 0.15s;background:var(--mid);}
+  .cat-toggle.on{border-color:var(--c1);background:rgba(255,107,43,0.1);}
+  .cat-toggle-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;}
+  .cat-toggle-name{font-size:13px;font-weight:500;}
+  .cat-check{margin-left:auto;width:16px;height:16px;border-radius:4px;border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:10px;}
+  .cat-toggle.on .cat-check{background:var(--c1);border-color:var(--c1);color:#fff;}
+
+  .game-container{max-width:680px;margin:0 auto;padding:1.5rem;}
+  .scoreboard{display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1.5rem;}
+  .score-card{border-radius:12px;padding:1rem 1.25rem;border:1px solid transparent;transition:border-color 0.2s;}
+  .score-card.active-team{border-color:var(--c1);}
+  .score-card-t1{background:rgba(255,107,43,0.08);}
+  .score-card-t2{background:rgba(6,214,160,0.08);}
+  .score-team-name{font-size:11px;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;margin-bottom:4px;}
+  .score-players{font-size:13px;color:var(--muted);margin-bottom:8px;}
+  .score-num{font-family:'Bebas Neue',sans-serif;font-size:48px;line-height:1;}
+  .progress-bar-wrap{background:var(--card);border-radius:6px;height:6px;overflow:hidden;margin-bottom:1.5rem;}
+  .progress-bar-fill{height:100%;background:var(--c1);border-radius:6px;transition:width 0.4s;}
+  .round-info{display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem;}
+  .round-tag{font-size:11px;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted);}
+  .turn-tag{font-size:12px;font-weight:500;padding:4px 10px;border-radius:20px;}
+  .timer-row{display:flex;align-items:center;gap:12px;margin-bottom:1rem;}
+  .timer-label{font-size:13px;color:var(--muted);}
+  .timer-num{font-family:'Bebas Neue',sans-serif;font-size:32px;color:var(--c3);min-width:40px;transition:color 0.3s;}
+  .timer-num.urgent{color:var(--c2);}
+  .timer-bar-wrap{flex:1;background:var(--card);border-radius:4px;height:4px;overflow:hidden;}
+  .timer-bar-fill{height:100%;background:var(--c3);border-radius:4px;transition:width 1s linear,background 0.3s;}
+  .timer-bar-fill.urgent{background:var(--c2);}
+  .question-card{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:1.5rem;margin-bottom:1rem;}
+  .q-category{font-size:11px;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;margin-bottom:0.75rem;}
+  .q-text{font-size:19px;font-weight:500;line-height:1.45;margin-bottom:1.25rem;}
+  .answers-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+  .answer-btn{background:var(--mid);border:1px solid var(--border);border-radius:10px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:14px;font-weight:500;padding:12px;cursor:pointer;text-align:left;transition:all 0.15s;display:flex;align-items:center;gap:10px;line-height:1.3;}
+  .answer-btn:hover:not(:disabled){background:var(--card);border-color:#555;}
+  .answer-btn:disabled{cursor:default;}
+  .answer-btn.correct{background:rgba(6,214,160,0.15);border-color:#06D6A0;color:#06D6A0;}
+  .answer-btn.wrong{background:rgba(255,58,92,0.1);border-color:var(--c2);color:var(--c2);}
+  .answer-letter{width:24px;height:24px;border-radius:50%;background:var(--border);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:600;flex-shrink:0;}
+  .correct .answer-letter{background:#06D6A0;color:var(--dark);}
+  .wrong .answer-letter{background:var(--c2);color:#fff;}
+  .feedback-panel{background:var(--card);border-radius:12px;padding:1rem 1.25rem;margin-bottom:1rem;display:none;align-items:center;gap:12px;}
+  .feedback-panel.show{display:flex;}
+  .feedback-icon{width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:700;flex-shrink:0;}
+  .feedback-text{font-size:14px;line-height:1.4;}
+  .next-btn-wrap{display:flex;gap:8px;}
+
+  /* HANGMAN SETUP */
+  .hm-setup{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:1.5rem;margin-bottom:1rem;}
+  .hm-setup-title{font-size:11px;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:#A78BFA;margin-bottom:0.5rem;}
+  .hm-setup-desc{font-size:14px;color:var(--muted);margin-bottom:1rem;line-height:1.5;}
+  .hm-word-input{width:100%;background:var(--mid);border:2px solid #A78BFA44;border-radius:10px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:20px;font-weight:500;padding:12px 16px;outline:none;text-align:center;letter-spacing:0.1em;text-transform:uppercase;transition:border-color 0.15s;}
+  .hm-word-input:focus{border-color:#A78BFA;}
+  .hm-word-input::placeholder{color:var(--muted);font-size:14px;letter-spacing:0;}
+  .hm-hint-input{width:100%;background:var(--mid);border:1px solid var(--border);border-radius:8px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:14px;padding:10px 14px;outline:none;margin-top:8px;transition:border-color 0.15s;}
+  .hm-hint-input:focus{border-color:#A78BFA;}
+  .hm-hint-input::placeholder{color:var(--muted);}
+
+  /* HANGMAN GAME */
+  .hm-game-card{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:1.5rem;margin-bottom:1rem;}
+  .hm-svg-wrap{display:flex;justify-content:center;margin-bottom:1rem;}
+  .hm-word-display{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin-bottom:1.25rem;}
+  .hm-letter-box{width:32px;height:40px;border-bottom:2px solid var(--text);display:flex;align-items:flex-end;justify-content:center;font-family:'Bebas Neue',sans-serif;font-size:24px;color:var(--text);}
+  .hm-letter-box.space{border-bottom-color:transparent;width:16px;}
+  .hm-hint{font-size:13px;color:var(--muted);text-align:center;margin-bottom:1rem;}
+  .hm-keyboard{display:flex;flex-wrap:wrap;gap:6px;justify-content:center;margin-bottom:1rem;}
+  .hm-key{width:34px;height:34px;border-radius:6px;border:1px solid var(--border);background:var(--mid);color:var(--text);font-family:'DM Sans',sans-serif;font-size:13px;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all 0.1s;text-transform:uppercase;}
+  .hm-key:hover:not(:disabled){background:var(--card);border-color:#555;}
+  .hm-key.hit{background:rgba(6,214,160,0.15);border-color:#06D6A0;color:#06D6A0;cursor:default;}
+  .hm-key.miss{background:rgba(255,58,92,0.1);border-color:var(--c2);color:var(--c2);cursor:default;}
+  .hm-key:disabled{cursor:default;}
+  .hm-wrong-letters{font-size:13px;color:var(--muted);text-align:center;margin-bottom:0.75rem;}
+  .hm-status{font-family:'Bebas Neue',sans-serif;font-size:28px;text-align:center;margin-bottom:1rem;}
+
+  /* RESULTS */
+  .results-container{max-width:520px;margin:0 auto;padding:2rem 1.5rem;text-align:center;}
+  .winner-badge{display:inline-block;font-size:11px;font-weight:600;letter-spacing:0.12em;text-transform:uppercase;padding:6px 18px;border-radius:20px;margin-bottom:1rem;}
+  .winner-title{font-family:'Bebas Neue',sans-serif;font-size:56px;line-height:1;margin-bottom:0.25rem;}
+  .winner-subtitle{font-size:16px;color:var(--muted);margin-bottom:2rem;}
+  .final-scores{display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:2rem;}
+  .final-score-card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:1.25rem;}
+  .final-score-card.winner-card{border-color:var(--c1);}
+  .final-team-name{font-size:11px;color:var(--muted);margin-bottom:4px;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;}
+  .final-players{font-size:13px;color:var(--muted);margin-bottom:8px;}
+  .final-score-num{font-family:'Bebas Neue',sans-serif;font-size:52px;line-height:1;}
+  .final-pts{font-size:13px;color:var(--muted);}
+  .stat-row{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:2rem;}
+  .stat-card{background:var(--card);border-radius:10px;padding:12px;text-align:center;}
+  .stat-val{font-family:'Bebas Neue',sans-serif;font-size:28px;color:var(--c1);}
+  .stat-lbl{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:0.08em;margin-top:2px;}
+</style>
+
+<div id="app">
+
+<!-- LANDING -->
+<div id="landing" class="screen active">
+  <div class="grid-bg"></div>
+  <div class="landing-badge">6 players — 2 teams — party trivia</div>
+  <div class="game-title"><div class="title-main">BRAIN</div><div class="title-sub">WARS</div></div>
+  <div class="title-edition">Party Edition</div>
+  <p class="landing-sub">Food, films, social chaos, logic, Lebanese pride, and the classic Hangman — all in one battle.</p>
+  <button class="btn-primary" onclick="showScreen('setup')">Yalla, let's go!</button>
+  <div class="cat-pills">
+    <span class="cat-pill" style="border-color:#FF6B2B44;color:#FF6B2B">Food & Drinks</span>
+    <span class="cat-pill" style="border-color:#FFD16644;color:#FFD166">Social & Fun</span>
+    <span class="cat-pill" style="border-color:#A78BFA44;color:#A78BFA">Film & TV</span>
+    <span class="cat-pill" style="border-color:#06D6A044;color:#06D6A0">Logic & Riddles</span>
+    <span class="cat-pill" style="border-color:#EF444444;color:#EF4444">Lebanese</span>
+    <span class="cat-pill" style="border-color:#EC4899AA;color:#EC4899">Hangman</span>
+  </div>
+</div>
+
+<!-- SETUP -->
+<div id="setup" class="screen">
+  <div class="setup-container">
+    <div class="step-label">Team Setup</div>
+    <div class="screen-title">Who's playing?</div>
+    <div class="team-card">
+      <div class="team-header"><div class="team-color-dot" style="background:var(--c1)"></div><div class="team-label">Team 1 — Orange Squad</div></div>
+      <div class="player-input"><div class="player-icon" style="background:rgba(255,107,43,0.15);color:var(--c1)">P1</div><input class="inp" id="p1" placeholder="Player 1 name"></div>
+      <div class="player-input"><div class="player-icon" style="background:rgba(255,107,43,0.15);color:var(--c1)">P2</div><input class="inp" id="p2" placeholder="Player 2 name"></div>
+      <div class="player-input"><div class="player-icon" style="background:rgba(255,107,43,0.15);color:var(--c1)">P3</div><input class="inp" id="p3" placeholder="Player 3 name"></div>
+    </div>
+    <div class="team-card">
+      <div class="team-header"><div class="team-color-dot" style="background:var(--c4)"></div><div class="team-label">Team 2 — Green Squad</div></div>
+      <div class="player-input"><div class="player-icon" style="background:rgba(6,214,160,0.15);color:var(--c4)">P4</div><input class="inp" id="p4" placeholder="Player 4 name"></div>
+      <div class="player-input"><div class="player-icon" style="background:rgba(6,214,160,0.15);color:var(--c4)">P5</div><input class="inp" id="p5" placeholder="Player 5 name"></div>
+      <div class="player-input"><div class="player-icon" style="background:rgba(6,214,160,0.15);color:var(--c4)">P6</div><input class="inp" id="p6" placeholder="Player 6 name"></div>
+    </div>
+    <div class="settings-row">
+      <div class="setting-block"><div class="setting-label">Rounds</div><select class="setting-select" id="roundCount"><option value="5">5 rounds</option><option value="10" selected>10 rounds</option><option value="15">15 rounds</option></select></div>
+      <div class="setting-block"><div class="setting-label">Timer</div><select class="setting-select" id="timerSetting"><option value="10">10 sec (spicy)</option><option value="15" selected>15 sec (classic)</option><option value="20">20 sec (chill)</option></select></div>
+    </div>
+    <div class="cats-block">
+      <div class="setting-label">Categories — pick what you want to play</div>
+      <div class="cats-grid" id="catsGrid"></div>
+    </div>
+    <button class="btn-primary" style="width:100%" onclick="startGame()">Yalla Nle3ab!</button>
+    <div style="margin-top:12px;text-align:center"><button class="btn-secondary" onclick="showScreen('landing')">Back</button></div>
+  </div>
+</div>
+
+<!-- GAME (trivia) -->
+<div id="game" class="screen">
+  <div class="game-container">
+    <div class="scoreboard">
+      <div class="score-card score-card-t1" id="sc1">
+        <div class="score-team-name" style="color:var(--c1)" id="sc1-name">Orange Squad</div>
+        <div class="score-players" id="sc1-players">P1 & P2</div>
+        <div class="score-num" style="color:var(--c1)" id="score1">0</div>
+      </div>
+      <div class="score-card score-card-t2" id="sc2">
+        <div class="score-team-name" style="color:var(--c4)" id="sc2-name">Green Squad</div>
+        <div class="score-players" id="sc2-players">P3 & P4</div>
+        <div class="score-num" style="color:var(--c4)" id="score2">0</div>
+      </div>
+    </div>
+    <div class="progress-bar-wrap"><div class="progress-bar-fill" id="progressFill" style="width:0%"></div></div>
+    <div class="round-info">
+      <div class="round-tag" id="roundLabel">Question 1</div>
+      <div class="turn-tag" id="turnTag">Orange's turn</div>
+    </div>
+    <div class="timer-row">
+      <div class="timer-label">Time</div>
+      <div class="timer-num" id="timerNum">15</div>
+      <div class="timer-bar-wrap"><div class="timer-bar-fill" id="timerBar" style="width:100%"></div></div>
+    </div>
+    <div class="question-card">
+      <div class="q-category" id="qCategory">Food</div>
+      <div class="q-text" id="qText">Loading...</div>
+      <div class="answers-grid" id="answersGrid"></div>
+    </div>
+    <div class="feedback-panel" id="feedbackPanel">
+      <div class="feedback-icon" id="feedbackIcon"></div>
+      <div class="feedback-text" id="feedbackText"></div>
+    </div>
+    <div class="next-btn-wrap">
+      <button class="btn-secondary" id="changeBtn" style="flex:1" onclick="changeQuestion()">↺ Different question</button>
+      <button class="btn-primary" id="nextBtn" style="flex:1;display:none" onclick="nextQuestion()">Next question</button>
+    </div>
+  </div>
+</div>
+
+<!-- HANGMAN SETUP -->
+<div id="hmSetup" class="screen">
+  <div class="game-container">
+    <div class="scoreboard">
+      <div class="score-card score-card-t1"><div class="score-team-name" style="color:var(--c1)" id="hms-sc1-name">Orange Squad</div><div class="score-players" id="hms-sc1-players">P1 & P2</div><div class="score-num" style="color:var(--c1)" id="hms-score1">0</div></div>
+      <div class="score-card score-card-t2"><div class="score-team-name" style="color:var(--c4)" id="hms-sc2-name">Green Squad</div><div class="score-players" id="hms-sc2-players">P3 & P4</div><div class="score-num" style="color:var(--c4)" id="hms-score2">0</div></div>
+    </div>
+    <div class="hm-setup">
+      <div class="hm-setup-title">Hangman setup</div>
+      <div class="hm-setup-desc" id="hmsDesc">Team Orange — enter a word or phrase for Team Green to guess. Make it tricky! The other team should look away.</div>
+      <input class="hm-word-input" id="hmWordInput" placeholder="Type the word or phrase..." autocomplete="off" autocorrect="off" spellcheck="false">
+      <input class="hm-hint-input" id="hmHintInput" placeholder="Optional hint (category, topic, context...)">
+    </div>
+    <div class="next-btn-wrap">
+      <button class="btn-primary" style="flex:1" onclick="startHangman()">Start Hangman!</button>
+      <button class="btn-secondary" onclick="skipHangman()">Skip this round</button>
+    </div>
+  </div>
+</div>
+
+<!-- HANGMAN GAME -->
+<div id="hmGame" class="screen">
+  <div class="game-container">
+    <div class="scoreboard">
+      <div class="score-card score-card-t1"><div class="score-team-name" style="color:var(--c1)" id="hmg-sc1-name">Orange Squad</div><div class="score-players" id="hmg-sc1-players">P1 & P2</div><div class="score-num" style="color:var(--c1)" id="hmg-score1">0</div></div>
+      <div class="score-card score-card-t2" id="hmg-sc2"><div class="score-team-name" style="color:var(--c4)" id="hmg-sc2-name">Green Squad</div><div class="score-players" id="hmg-sc2-players">P3 & P4</div><div class="score-num" style="color:var(--c4)" id="hmg-score2">0</div></div>
+    </div>
+    <div class="round-info">
+      <div class="round-tag" id="hmgRoundLabel">Hangman — Round 1</div>
+      <div class="turn-tag" style="background:rgba(236,72,153,0.15);color:#EC4899" id="hmgGuessingTag">Green is guessing</div>
+    </div>
+    <div class="hm-game-card">
+      <div class="hm-svg-wrap">
+        <svg id="hmSvg" width="160" height="180" viewBox="0 0 160 180">
+          <line x1="20" y1="170" x2="140" y2="170" stroke="#555" stroke-width="3" stroke-linecap="round"/>
+          <line x1="50" y1="170" x2="50" y2="10" stroke="#555" stroke-width="3" stroke-linecap="round"/>
+          <line x1="50" y1="10" x2="110" y2="10" stroke="#555" stroke-width="3" stroke-linecap="round"/>
+          <line x1="110" y1="10" x2="110" y2="30" stroke="#555" stroke-width="3" stroke-linecap="round"/>
+          <circle id="hm-head" cx="110" cy="45" r="15" stroke="#FF6B2B" stroke-width="2.5" fill="none" opacity="0"/>
+          <line id="hm-body" x1="110" y1="60" x2="110" y2="110" stroke="#FF6B2B" stroke-width="2.5" stroke-linecap="round" opacity="0"/>
+          <line id="hm-larm" x1="110" y1="75" x2="85" y2="100" stroke="#FF6B2B" stroke-width="2.5" stroke-linecap="round" opacity="0"/>
+          <line id="hm-rarm" x1="110" y1="75" x2="135" y2="100" stroke="#FF6B2B" stroke-width="2.5" stroke-linecap="round" opacity="0"/>
+          <line id="hm-lleg" x1="110" y1="110" x2="85" y2="140" stroke="#FF6B2B" stroke-width="2.5" stroke-linecap="round" opacity="0"/>
+          <line id="hm-rleg" x1="110" y1="110" x2="135" y2="140" stroke="#FF6B2B" stroke-width="2.5" stroke-linecap="round" opacity="0"/>
+        </svg>
+      </div>
+      <div class="hm-word-display" id="hmWordDisplay"></div>
+      <div class="hm-hint" id="hmHintDisplay"></div>
+      <div class="hm-wrong-letters" id="hmWrongLetters">Wrong guesses: —</div>
+      <div class="hm-status" id="hmStatus"></div>
+      <div class="hm-keyboard" id="hmKeyboard"></div>
+    </div>
+    <div class="next-btn-wrap"><button class="btn-primary" id="hmNextBtn" style="flex:1;display:none" onclick="afterHangman()">Next question</button></div>
+  </div>
+</div>
+
+<!-- RESULTS -->
+<div id="results" class="screen">
+  <div class="results-container">
+    <div class="winner-badge" id="winnerBadge">Champion</div>
+    <div class="winner-title" id="winnerTitle">Orange Wins!</div>
+    <div class="winner-subtitle" id="winnerSubtitle">Congrats!</div>
+    <div class="final-scores">
+      <div class="final-score-card" id="fs1"><div class="final-team-name" style="color:var(--c1)" id="fs1-name">Orange Squad</div><div class="final-players" id="fs1-players">P1 & P2</div><div class="final-score-num" style="color:var(--c1)" id="fs1-score">0</div><div class="final-pts">points</div></div>
+      <div class="final-score-card" id="fs2"><div class="final-team-name" style="color:var(--c4)" id="fs2-name">Green Squad</div><div class="final-players" id="fs2-players">P3 & P4</div><div class="final-score-num" style="color:var(--c4)" id="fs2-score">0</div><div class="final-pts">points</div></div>
+    </div>
+    <div class="stat-row">
+      <div class="stat-card"><div class="stat-val" id="statRounds">10</div><div class="stat-lbl">Rounds</div></div>
+      <div class="stat-card"><div class="stat-val" id="statCorrect">0</div><div class="stat-lbl">Correct</div></div>
+      <div class="stat-card"><div class="stat-val" id="statAccuracy">0%</div><div class="stat-lbl">Accuracy</div></div>
+    </div>
+    <button class="btn-primary" style="width:100%;margin-bottom:12px" onclick="startGame()">Play again</button>
+    <button class="btn-secondary" style="width:100%" onclick="showScreen('landing')">Back to home</button>
+  </div>
+</div>
+
+</div>
+
+<script>
+const CAT_COLORS={'Food & Drinks':'#FF6B2B','Social & Fun':'#FFD166','Film & TV':'#A78BFA','Logic & Riddles':'#06D6A0','Lebanese':'#EF4444','Hangman':'#EC4899'};
+const ALL_CATS=['Food & Drinks','Social & Fun','Film & TV','Logic & Riddles','Lebanese','Hangman'];
+
+const QUESTIONS=[
+  {cat:'Food & Drinks',q:'What is the main protein in a classic Caesar salad dressing?',a:['Anchovies','Tuna','Egg white','Parmesan'],correct:0},
+  {cat:'Food & Drinks',q:'Which country invented sushi?',a:['Japan','China','Korea','Thailand'],correct:0},
+  {cat:'Food & Drinks',q:'What type of pasta means "little worms" in Italian?',a:['Vermicelli','Spaghetti','Linguine','Tagliatelle'],correct:0},
+  {cat:'Food & Drinks',q:'Which spirit is the base of a Margarita?',a:['Tequila','Rum','Vodka','Gin'],correct:0},
+  {cat:'Food & Drinks',q:'What is the most consumed meat in the world?',a:['Pork','Chicken','Beef','Lamb'],correct:0},
+  {cat:'Food & Drinks',q:'Mole sauce originates from which country?',a:['Mexico','Spain','Colombia','Peru'],correct:0},
+  {cat:'Food & Drinks',q:'What fruit is technically a berry — botanically speaking?',a:['Banana','Strawberry','Raspberry','Cherry'],correct:0},
+  {cat:'Food & Drinks',q:'What is the most expensive spice in the world?',a:['Saffron','Vanilla','Cardamom','Truffle'],correct:0},
+  {cat:'Food & Drinks',q:'Which cheese is traditionally used in a Greek salad?',a:['Feta','Halloumi','Ricotta','Manchego'],correct:0},
+  {cat:'Food & Drinks',q:'Lebanese maamoul cookies are typically filled with what?',a:['Dates or nuts','Chocolate','Cream cheese','Jam'],correct:0},
+  {cat:'Food & Drinks',q:'What does "al dente" mean when cooking pasta?',a:['Firm to the bite','Soft and tender','Lightly salted','Well cooked'],correct:0},
+  {cat:'Food & Drinks',q:'Which country drinks the most coffee per capita?',a:['Finland','Italy','Brazil','USA'],correct:0},
+
+  {cat:'Social & Fun',q:'What does "ghosting" mean in modern social culture?',a:['Cutting off contact without explanation','Stalking someone online','Lying about your age','Faking an illness'],correct:0},
+  {cat:'Social & Fun',q:'Which app is famous for disappearing photo messages?',a:['Snapchat','Instagram','TikTok','WhatsApp'],correct:0},
+  {cat:'Social & Fun',q:'What is a "situationship"?',a:['An undefined romantic relationship','A complicated friendship','A long-distance relationship','A work romance'],correct:0},
+  {cat:'Social & Fun',q:'If someone is "low-key" doing something, what does that mean?',a:['Doing it quietly or modestly','Doing it loudly','Doing it with many people','Denying it publicly'],correct:0},
+  {cat:'Social & Fun',q:'What does "FOMO" stand for?',a:['Fear Of Missing Out','Feeling Of Moving On','Friends Over Multiple Occasions','Finding One More Option'],correct:0},
+  {cat:'Social & Fun',q:'What social media term means a major life update shared publicly?',a:['Announcement post','Story','Vlog','Thread'],correct:0},
+  {cat:'Social & Fun',q:'Which language do most Lebanese people mix into Arabic in daily conversation?',a:['French and English','Spanish and French','English only','Italian and French'],correct:0},
+  {cat:'Social & Fun',q:'What is the social norm for splitting a bill in Lebanon among friends?',a:['One person pays and others pay them back — or argue forever','Always split evenly','Oldest person pays','Whoever invited pays'],correct:0},
+  {cat:'Social & Fun',q:'What does "red flag" mean in dating slang?',a:['A warning sign in a person or relationship','An angry moment','A passionate gesture','Commitment'],correct:0},
+  {cat:'Social & Fun',q:'What is the "vibe check" test?',a:['Assessing someone\'s energy or mood','A music playlist test','Checking if food tastes good','A fashion check'],correct:0},
+  {cat:'Social & Fun',q:'What does "salty" mean as a personality description?',a:['Bitter or resentful','Very happy','Overly generous','Shy and quiet'],correct:0},
+  {cat:'Social & Fun',q:'If someone says "no cap," what do they mean?',a:['No lie — for real','I am not wearing a hat','I have no limits','I disagree'],correct:0},
+
+  {cat:'Film & TV',q:'Which show features a chemistry teacher who becomes a drug lord?',a:['Breaking Bad','Ozark','Narcos','The Wire'],correct:0},
+  {cat:'Film & TV',q:'Who directed the movie Parasite (2019)?',a:['Bong Joon-ho','Park Chan-wook','Kim Jee-woon','Lee Chang-dong'],correct:0},
+  {cat:'Film & TV',q:'What is the highest-grossing film franchise of all time?',a:['Marvel Cinematic Universe','Star Wars','Harry Potter','James Bond'],correct:0},
+  {cat:'Film & TV',q:'Which actor has played James Bond the most times?',a:['Roger Moore','Sean Connery','Pierce Brosnan','Daniel Craig'],correct:0},
+  {cat:'Film & TV',q:'In Game of Thrones, what is the name of Jon Snow\'s direwolf?',a:['Ghost','Shadow','Storm','Wolf'],correct:0},
+  {cat:'Film & TV',q:'Which film won Best Picture at the 2020 Oscars?',a:['Parasite','1917','Joker','Once Upon a Time in Hollywood'],correct:0},
+  {cat:'Film & TV',q:'Who voices Woody in the Toy Story franchise?',a:['Tom Hanks','Tom Cruise','Bill Murray','Robin Williams'],correct:0},
+  {cat:'Film & TV',q:'What year was Netflix founded?',a:['1997','2000','1994','2002'],correct:0},
+  {cat:'Film & TV',q:'Which Lebanese film was nominated for an Oscar for Best Foreign Film?',a:['Caramel by Nadine Labaki','Where Do We Go Now','The Attack','Bosta'],correct:0},
+  {cat:'Film & TV',q:'In Friends, what is the name of Ross\'s pet monkey?',a:['Marcel','Coco','Banana','Max'],correct:0},
+  {cat:'Film & TV',q:'Which streaming platform produced Stranger Things?',a:['Netflix','HBO','Amazon','Disney+'],correct:0},
+  {cat:'Film & TV',q:'What does MCU stand for?',a:['Marvel Cinematic Universe','Major Comic Universe','Marvel Creative Unit','Modern Cinema Universe'],correct:0},
+
+  {cat:'Logic & Riddles',q:'I have cities but no houses, mountains but no trees, and water but no fish. What am I?',a:['A map','A painting','A dream','A video game'],correct:0},
+  {cat:'Logic & Riddles',q:'The more you take, the more you leave behind. What am I?',a:['Footsteps','Time','Money','Memories'],correct:0},
+  {cat:'Logic & Riddles',q:'What has hands but cannot clap?',a:['A clock','A glove','A puppet','A statue'],correct:0},
+  {cat:'Logic & Riddles',q:'A rooster lays an egg at the top of a barn. Which way does it roll?',a:['Roosters don\'t lay eggs','Left','Right','It doesn\'t roll'],correct:0},
+  {cat:'Logic & Riddles',q:'If it takes 5 machines 5 minutes to make 5 widgets, how long for 100 machines to make 100 widgets?',a:['5 minutes','100 minutes','10 minutes','50 minutes'],correct:0},
+  {cat:'Logic & Riddles',q:'You are in a race and overtake the person in second place. Where are you now?',a:['Second place','First place','Third place','Last place'],correct:0},
+  {cat:'Logic & Riddles',q:'What gets bigger the more you take away from it?',a:['A hole','A debt','A shadow','A silence'],correct:0},
+  {cat:'Logic & Riddles',q:'I have a tail and a head but no body. What am I?',a:['A coin','A comet','A snake','A kite'],correct:0},
+  {cat:'Logic & Riddles',q:'What breaks but never falls, and falls but never breaks?',a:['Day and night','Glass and water','Sound and light','Rock and paper'],correct:0},
+  {cat:'Logic & Riddles',q:'You light me up but I am not a candle. I have keys but no locks. What am I?',a:['A keyboard','A piano','A phone','A lantern'],correct:0},
+
+  {cat:'Lebanese',q:'What is the capital of Lebanon?',a:['Beirut','Tripoli','Jounieh','Sidon'],correct:0},
+  {cat:'Lebanese',q:'What is the national symbol on Lebanon\'s flag?',a:['A cedar tree','An olive branch','A palm tree','A crescent'],correct:0},
+  {cat:'Lebanese',q:'Which ancient Lebanese city is considered one of the oldest inhabited cities in the world?',a:['Byblos (Jbeil)','Baalbek','Sidon','Tyre'],correct:0},
+  {cat:'Lebanese',q:'Who is Lebanon\'s most iconic singer, known as "the voice of Lebanon"?',a:['Fairuz','Sabah','Majida el Roumi','Julia Boutros'],correct:0},
+  {cat:'Lebanese',q:'What ancient temple complex in Lebanon is a UNESCO World Heritage Site?',a:['Baalbek','Anjar','Byblos','Tyre'],correct:0},
+  {cat:'Lebanese',q:'In which year did Lebanon gain independence from France?',a:['1943','1920','1958','1975'],correct:0},
+  {cat:'Lebanese',q:'Which two countries border Lebanon?',a:['Syria and Israel','Syria and Jordan','Turkey and Syria','Jordan and Israel'],correct:0},
+  {cat:'Lebanese',q:'What does "Yalla" mean in Lebanese Arabic?',a:['Let\'s go / come on','Hello','No way','Goodbye'],correct:0},
+  {cat:'Lebanese',q:'Which card game is most played at Lebanese family gatherings?',a:['Trix','Poker','Blackjack','Rummy'],correct:0},
+  {cat:'Lebanese',q:'What is knefeh primarily made of?',a:['Semolina, cheese, and syrup','Filo pastry and honey','Rice flour and cream','Cornmeal and sugar'],correct:0},
+  {cat:'Lebanese',q:'Which Lebanese director made the film "Caramel" (2007)?',a:['Nadine Labaki','Ziad Doueiri','Philippe Aractingi','Danielle Arbid'],correct:0},
+  {cat:'Lebanese',q:'What is the tallest mountain in Lebanon?',a:['Qornet es Sawda','Mount Sannine','Jabal Moussa','Tannourine'],correct:0},
+
+  {cat:'Food & Drinks',q:'What is the main ingredient in hummus?',a:['Chickpeas','Lentils','Broad beans','White beans'],correct:0},
+  {cat:'Food & Drinks',q:'Which country is credited with inventing pizza?',a:['Italy','Greece','France','Turkey'],correct:0},
+  {cat:'Food & Drinks',q:'What nut is the key ingredient in marzipan?',a:['Almond','Hazelnut','Walnut','Cashew'],correct:0},
+  {cat:'Food & Drinks',q:'Which grain is used to make traditional Japanese sake?',a:['Rice','Barley','Wheat','Corn'],correct:0},
+  {cat:'Food & Drinks',q:'What is a "flat white" coffee?',a:['Espresso with steamed milk','Black coffee with foam','Iced espresso','Cold brew'],correct:0},
+  {cat:'Food & Drinks',q:'Which vegetable is used to make traditional borscht soup?',a:['Beetroot','Cabbage','Carrot','Potato'],correct:0},
+  {cat:'Food & Drinks',q:'What is the national dish of Japan?',a:['Curry rice','Ramen','Sushi','Tempura'],correct:0},
+  {cat:'Food & Drinks',q:'How many glasses of water should you drink per day according to common advice?',a:['8 glasses','4 glasses','12 glasses','6 glasses'],correct:0},
+
+  {cat:'Social & Fun',q:'What does "TBH" stand for in texting?',a:['To Be Honest','Text Back Here','Try Being Human','Totally Bad Habit'],correct:0},
+  {cat:'Social & Fun',q:'What does "DM" mean on social media?',a:['Direct Message','Digital Media','Delete Me','Daily Moment'],correct:0},
+  {cat:'Social & Fun',q:'What is "doom scrolling"?',a:['Endlessly consuming negative news online','Deleting your social media','Watching horror films','Sending angry messages'],correct:0},
+  {cat:'Social & Fun',q:'What does "IRL" stand for?',a:['In Real Life','I Really Like','Instantly Reacting Live','It\'s Really Long'],correct:0},
+  {cat:'Social & Fun',q:'What is a "finsta"?',a:['A fake or private secondary Instagram','A Finnish influencer','A deleted account','A business page'],correct:0},
+  {cat:'Social & Fun',q:'What does it mean to be "left on read"?',a:['Someone saw your message and didn\'t reply','Being blocked','Being muted','Getting a delayed reply'],correct:0},
+  {cat:'Social & Fun',q:'What is "soft launching" in dating culture?',a:['Subtly hinting a new partner on social media','Going public with a relationship','Breaking up quietly','A first date'],correct:0},
+
+  {cat:'Film & TV',q:'Which movie features the iconic line "I\'ll be back"?',a:['The Terminator','Predator','Total Recall','RoboCop'],correct:0},
+  {cat:'Film & TV',q:'What is the name of Batman\'s loyal butler?',a:['Alfred','James','Edwin','Walter'],correct:0},
+  {cat:'Film & TV',q:'Which animated film features a clownfish searching for his son?',a:['Finding Nemo','The Little Mermaid','Shark Tale','Moana'],correct:0},
+  {cat:'Film & TV',q:'What is the name of the wizard school in Harry Potter?',a:['Hogwarts','Durmstrang','Beauxbatons','Ilvermorny'],correct:0},
+  {cat:'Film & TV',q:'Which actor played Iron Man in the MCU?',a:['Robert Downey Jr.','Chris Evans','Mark Ruffalo','Jeremy Renner'],correct:0},
+  {cat:'Film & TV',q:'In which city is the TV show "Seinfeld" set?',a:['New York City','Los Angeles','Chicago','Boston'],correct:0},
+  {cat:'Film & TV',q:'What is the highest-rated TV show on IMDb?',a:['Breaking Bad','The Wire','The Sopranos','Game of Thrones'],correct:0},
+
+  {cat:'Logic & Riddles',q:'What comes once in a minute, twice in a moment, but never in a thousand years?',a:['The letter M','Silence','A second','A heartbeat'],correct:0},
+  {cat:'Logic & Riddles',q:'If a doctor gives you 3 pills and says take one every half hour, how long until they\'re gone?',a:['1 hour','30 minutes','1.5 hours','2 hours'],correct:0},
+  {cat:'Logic & Riddles',q:'What word becomes shorter when you add two letters to it?',a:['Short','Quick','Brief','Tiny'],correct:0},
+  {cat:'Logic & Riddles',q:'A man walks into a bar and asks for a glass of water. The bartender pulls out a gun. The man says thank you and leaves. Why?',a:['He had hiccups','He was testing the bartender','He was a ghost','He wanted to scare someone'],correct:0},
+  {cat:'Logic & Riddles',q:'What is always in front of you but can never be seen?',a:['The future','Air','Your nose','Time'],correct:0},
+
+  {cat:'Lebanese',q:'What is the Lebanese street food of minced meat in flatbread, grilled on charcoal?',a:['Arayes','Kafta roll','Lahm baajine','Shawarma'],correct:0},
+  {cat:'Lebanese',q:'What does "shou baddak" mean in Lebanese Arabic?',a:['What do you want?','How are you?','Where are you going?','What is this?'],correct:0},
+  {cat:'Lebanese',q:'What is "markouk"?',a:['A thin flatbread baked on a saj','A type of Lebanese dessert','A grilled meat dish','A pickled vegetable'],correct:0},
+  {cat:'Lebanese',q:'Which city in Brazil has the largest Lebanese diaspora community in the Americas?',a:['São Paulo','Rio de Janeiro','Buenos Aires','Caracas'],correct:0},
+  {cat:'Lebanese',q:'What does "habibi" literally mean?',a:['My love / my dear','My friend','My brother','My heart'],correct:0},
+];
+
+const HM_PARTS=['hm-head','hm-body','hm-larm','hm-rarm','hm-lleg','hm-rleg'];
+const MAX_WRONG=HM_PARTS.length;
+
+let state={};
+let timerInterval=null;
+let selectedCats=new Set(ALL_CATS);
+
+function buildCatsGrid(){
+  const grid=document.getElementById('catsGrid');
+  grid.innerHTML='';
+  ALL_CATS.forEach(cat=>{
+    const div=document.createElement('div');
+    div.className='cat-toggle on';
+    div.dataset.cat=cat;
+    div.innerHTML=`<div class="cat-toggle-dot" style="background:${CAT_COLORS[cat]}"></div><span class="cat-toggle-name" style="font-size:13px">${cat}</span><div class="cat-check">✓</div>`;
+    div.onclick=()=>{
+      const on=div.classList.toggle('on');
+      div.querySelector('.cat-check').textContent=on?'✓':'';
+      if(on)selectedCats.add(cat); else selectedCats.delete(cat);
+    };
+    grid.appendChild(div);
+  });
+}
+
+function showScreen(id){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+
+function shuffle(arr){const a=[...arr];for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;}
+
+function startGame(){
+  const p1=document.getElementById('p1').value.trim()||'Player 1';
+  const p2=document.getElementById('p2').value.trim()||'Player 2';
+  const p3=document.getElementById('p3').value.trim()||'Player 3';
+  const p4=document.getElementById('p4').value.trim()||'Player 4';
+  const p5=document.getElementById('p5').value.trim()||'Player 5';
+  const p6=document.getElementById('p6').value.trim()||'Player 6';
+  const rounds=parseInt(document.getElementById('roundCount')?.value||10);
+  const timer=parseInt(document.getElementById('timerSetting')?.value||15);
+
+  const activeCats=[...selectedCats];
+  if(activeCats.length===0){alert('Please select at least one category!');return;}
+
+  const hasHangman=activeCats.includes('Hangman');
+  const nonHmQs=shuffle(QUESTIONS.filter(q=>activeCats.includes(q.cat)&&q.cat!=='Hangman'));
+  const totalSlots=rounds*2;
+  const hmCount=hasHangman?Math.max(1,Math.floor(totalSlots/5)):0;
+  const triviaCount=totalSlots-hmCount;
+
+  let pool=[...nonHmQs];
+  while(pool.length<triviaCount)pool=[...pool,...shuffle(nonHmQs)];
+  let questionList=pool.slice(0,triviaCount);
+
+  if(hmCount>0){
+    const step=Math.floor(questionList.length/(hmCount+1));
+    for(let i=hmCount-1;i>=0;i--){
+      const base=(i+1)*step;
+      const jitter=Math.floor(Math.random()*3)-1;
+      const pos=Math.max(2,Math.min(questionList.length-1,base+jitter));
+      questionList.splice(pos,0,{cat:'Hangman',isHangman:true});
+    }
+  }
+
+  state={
+    t1:{name:'Orange Squad',players:`${p1}, ${p2} & ${p3}`,score:0},
+    t2:{name:'Green Squad',players:`${p4}, ${p5} & ${p6}`,score:0},
+    questions:questionList,
+    current:0,total:questionList.length,rounds,timer,timerMax:timer,timerLeft:timer,
+    answered:false,correctCount:0,trivaTotal:0,hmTurn:0,
+  };
+
+  updateScoreboard('sc1','sc2','score1','score2','sc1-name','sc1-players','sc2-name','sc2-players');
+  showScreen('game');
+  renderQuestion();
+}
+
+function updateScoreboard(id1,id2,s1,s2,n1,p1,n2,p2){
+  document.getElementById(n1).textContent=state.t1.name;
+  document.getElementById(p1).textContent=state.t1.players;
+  document.getElementById(n2).textContent=state.t2.name;
+  document.getElementById(p2).textContent=state.t2.players;
+  if(document.getElementById(s1))document.getElementById(s1).textContent=state.t1.score;
+  if(document.getElementById(s2))document.getElementById(s2).textContent=state.t2.score;
+}
+
+function currentTeam(){return state.current%2===0?'t1':'t2';}
+
+function renderQuestion(){
+  clearInterval(timerInterval);
+  const q=state.questions[state.current];
+  if(!q){showResults();return;}
+
+  if(q.isHangman){
+    goToHangmanSetup();
+    return;
+  }
+
+  state.answered=false;
+  const team=currentTeam();
+
+  document.getElementById('score1').textContent=state.t1.score;
+  document.getElementById('score2').textContent=state.t2.score;
+  document.getElementById('sc1').classList.toggle('active-team',team==='t1');
+  document.getElementById('sc2').classList.toggle('active-team',team==='t2');
+  document.getElementById('roundLabel').textContent=`Question ${state.current+1} of ${state.total}`;
+  document.getElementById('turnTag').textContent=`${state[team].name.split(' ')[0]}'s turn`;
+  document.getElementById('turnTag').style.background=team==='t1'?'rgba(255,107,43,0.15)':'rgba(6,214,160,0.15)';
+  document.getElementById('turnTag').style.color=team==='t1'?'var(--c1)':'var(--c4)';
+  document.getElementById('progressFill').style.width=(state.current/state.total*100)+'%';
+  document.getElementById('qCategory').textContent=q.cat;
+  document.getElementById('qCategory').style.color=CAT_COLORS[q.cat]||'var(--c3)';
+  document.getElementById('qText').textContent=q.q;
+
+  const grid=document.getElementById('answersGrid');
+  const letters=['A','B','C','D'];
+  const idx=shuffle([0,1,2,3]);
+  grid.innerHTML='';
+  idx.forEach((origIdx,pos)=>{
+    const btn=document.createElement('button');
+    btn.className='answer-btn';
+    btn.innerHTML=`<span class="answer-letter">${letters[pos]}</span>${q.a[origIdx]}`;
+    btn.dataset.orig=origIdx;
+    btn.onclick=()=>selectAnswer(origIdx,q.correct,btn);
+    grid.appendChild(btn);
+  });
+
+  document.getElementById('feedbackPanel').classList.remove('show');
+  document.getElementById('nextBtn').style.display='none';
+  document.getElementById('changeBtn').style.display='block';
+  state.timerLeft=state.timerMax;
+  updateTimer();
+  timerInterval=setInterval(()=>{
+    state.timerLeft--;
+    updateTimer();
+    if(state.timerLeft<=0){clearInterval(timerInterval);if(!state.answered)timeOut();}
+  },1000);
+}
+
+function updateTimer(){
+  const t=state.timerLeft;
+  const urgent=t<=5;
+  document.getElementById('timerNum').textContent=t;
+  document.getElementById('timerNum').classList.toggle('urgent',urgent);
+  document.getElementById('timerBar').style.width=(t/state.timerMax*100)+'%';
+  document.getElementById('timerBar').classList.toggle('urgent',urgent);
+}
+
+function changeQuestion(){
+  if(state.answered)return;
+  clearInterval(timerInterval);
+  const usedQs=new Set(state.questions.filter(q=>!q.isHangman).map(q=>q.q));
+  const activeCats=[...new Set(state.questions.filter(q=>!q.isHangman).map(q=>q.cat))];
+  const pool=QUESTIONS.filter(q=>activeCats.includes(q.cat)&&!usedQs.has(q.q));
+  if(pool.length===0){state.questions[state.current]=QUESTIONS[Math.floor(Math.random()*QUESTIONS.length)];}
+  else{state.questions[state.current]=pool[Math.floor(Math.random()*pool.length)];}
+  renderQuestion();
+}
+
+function selectAnswer(chosen,correct,btn){
+  if(state.answered)return;
+  state.answered=true;
+  clearInterval(timerInterval);
+  document.getElementById('changeBtn').style.display='none';
+  state.trivaTotal++;
+  document.querySelectorAll('.answer-btn').forEach(b=>{
+    b.disabled=true;
+    if(parseInt(b.dataset.orig)===correct)b.classList.add('correct');
+  });
+  const isCorrect=chosen===correct;
+  if(isCorrect){state[currentTeam()].score+=1;state.correctCount++;}
+  else btn.classList.add('wrong');
+  showFeedback(isCorrect,state.questions[state.current].a[correct]);
+}
+
+function timeOut(){
+  state.answered=true;
+  document.getElementById('changeBtn').style.display='none';
+  state.trivaTotal++;
+  const correct=state.questions[state.current].correct;
+  document.querySelectorAll('.answer-btn').forEach(b=>{
+    b.disabled=true;
+    if(parseInt(b.dataset.orig)===correct)b.classList.add('correct');
+  });
+  showFeedback(false,state.questions[state.current].a[correct],true);
+}
+
+function showFeedback(correct,correctAns,timedOut){
+  const panel=document.getElementById('feedbackPanel');
+  const icon=document.getElementById('feedbackIcon');
+  const text=document.getElementById('feedbackText');
+  panel.classList.add('show');
+  if(timedOut){
+    icon.style.background='rgba(255,58,92,0.15)';icon.textContent='T';
+    text.innerHTML=`<span style="color:var(--c2);font-weight:600">Time\'s up!</span><br><span style="color:var(--muted);font-size:13px">Correct: ${correctAns}</span>`;
+  }else if(correct){
+    icon.style.background='rgba(6,214,160,0.15)';icon.textContent='V';
+    text.innerHTML=`<span style="color:#06D6A0;font-weight:600">+1 for ${state[currentTeam()].name}!</span><br><span style="color:var(--muted);font-size:13px">${correctAns}</span>`;
+  }else{
+    icon.style.background='rgba(255,58,92,0.15)';icon.textContent='X';
+    text.innerHTML=`<span style="color:var(--c2);font-weight:600">Wrong!</span><br><span style="color:var(--muted);font-size:13px">Correct: ${correctAns}</span>`;
+  }
+  document.getElementById('nextBtn').style.display='block';
+}
+
+function nextQuestion(){
+  state.current++;
+  if(state.current>=state.total)showResults();
+  else renderQuestion();
+}
+
+function goToHangmanSetup(){
+  const settingTeam=state.hmTurn%2===0?'t1':'t2';
+  state.hmTurn++;
+  const guessingTeam=settingTeam==='t1'?'t2':'t1';
+  document.getElementById('hms-sc1-name').textContent=state.t1.name;
+  document.getElementById('hms-sc1-players').textContent=state.t1.players;
+  document.getElementById('hms-sc2-name').textContent=state.t2.name;
+  document.getElementById('hms-sc2-players').textContent=state.t2.players;
+  document.getElementById('hms-score1').textContent=state.t1.score;
+  document.getElementById('hms-score2').textContent=state.t2.score;
+  document.getElementById('hmsDesc').textContent=`${state[settingTeam].name} — enter a word or phrase for ${state[guessingTeam].name} to guess! The other team should look away.`;
+  document.getElementById('hmWordInput').value='';
+  document.getElementById('hmHintInput').value='';
+  showScreen('hmSetup');
+}
+
+function startHangman(){
+  const raw=document.getElementById('hmWordInput').value.trim().toUpperCase();
+  if(raw.length<2){alert('Please enter a word or phrase!');return;}
+  const hint=document.getElementById('hmHintInput').value.trim();
+  const settingTeam=currentTeam();
+  const guessingTeam=settingTeam==='t1'?'t2':'t1';
+
+  state.hm={
+    word:raw,
+    hint:hint,
+    guessed:new Set(),
+    wrongCount:0,
+    settingTeam,
+    guessingTeam,
+    done:false
+  };
+
+  document.getElementById('hmg-sc1-name').textContent=state.t1.name;
+  document.getElementById('hmg-sc1-players').textContent=state.t1.players;
+  document.getElementById('hmg-sc2-name').textContent=state.t2.name;
+  document.getElementById('hmg-sc2-players').textContent=state.t2.players;
+  document.getElementById('hmg-score1').textContent=state.t1.score;
+  document.getElementById('hmg-score2').textContent=state.t2.score;
+  document.getElementById('hmgRoundLabel').textContent=`Hangman — Question ${state.current+1}`;
+  document.getElementById('hmgGuessingTag').textContent=`${state[guessingTeam].name} is guessing`;
+  document.getElementById('hmNextBtn').style.display='none';
+  document.getElementById('hmStatus').textContent='';
+
+  renderHangman();
+  showScreen('hmGame');
+}
+
+function skipHangman(){
+  state.current++;
+  if(state.current>=state.total)showResults();
+  else{showScreen('game');renderQuestion();}
+}
+
+function renderHangman(){
+  const hm=state.hm;
+  HM_PARTS.forEach((id,i)=>{document.getElementById(id).setAttribute('opacity',i<hm.wrongCount?'1':'0');});
+
+  const display=document.getElementById('hmWordDisplay');
+  display.innerHTML='';
+  hm.word.split('').forEach(ch=>{
+    const box=document.createElement('div');
+    if(ch===' '){box.className='hm-letter-box space';}
+    else{
+      box.className='hm-letter-box';
+      box.textContent=hm.guessed.has(ch)?ch:'';
+    }
+    display.appendChild(box);
+  });
+
+  const hintEl=document.getElementById('hmHintDisplay');
+  hintEl.textContent=hm.hint?`Hint: ${hm.hint}`:'';
+
+  const wrongLetters=[...hm.guessed].filter(ch=>!hm.word.includes(ch));
+  document.getElementById('hmWrongLetters').textContent=wrongLetters.length?`Wrong: ${wrongLetters.join(', ')}`:'Wrong guesses: —';
+
+  buildKeyboard();
+}
+
+function buildKeyboard(){
+  const kb=document.getElementById('hmKeyboard');
+  kb.innerHTML='';
+  'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('').forEach(letter=>{
+    const btn=document.createElement('button');
+    btn.className='hm-key';
+    btn.textContent=letter;
+    const guessed=state.hm.guessed.has(letter);
+    if(guessed){
+      btn.disabled=true;
+      btn.classList.add(state.hm.word.includes(letter)?'hit':'miss');
+    }else if(state.hm.done){
+      btn.disabled=true;
+    }else{
+      btn.onclick=()=>guessLetter(letter);
+    }
+    kb.appendChild(btn);
+  });
+}
+
+function guessLetter(letter){
+  const hm=state.hm;
+  if(hm.done||hm.guessed.has(letter))return;
+  hm.guessed.add(letter);
+  if(!hm.word.includes(letter))hm.wrongCount++;
+
+  const wordLetters=hm.word.replace(/ /g,'').split('');
+  const allGuessed=wordLetters.every(ch=>hm.guessed.has(ch));
+  const lost=hm.wrongCount>=MAX_WRONG;
+
+  renderHangman();
+
+  if(allGuessed){
+    hm.done=true;
+    state[hm.guessingTeam].score+=2;
+    document.getElementById('hmg-score1').textContent=state.t1.score;
+    document.getElementById('hmg-score2').textContent=state.t2.score;
+    document.getElementById('hmStatus').textContent=`${state[hm.guessingTeam].name} guessed it! +2 points!`;
+    document.getElementById('hmStatus').style.color='#06D6A0';
+    document.getElementById('hmNextBtn').style.display='block';
+    buildKeyboard();
+  }else if(lost){
+    hm.done=true;
+    hm.word.split('').forEach(ch=>{if(ch!==' ')hm.guessed.add(ch);});
+    renderHangman();
+    document.getElementById('hmStatus').textContent=`Game over! The word was: ${hm.word}`;
+    document.getElementById('hmStatus').style.color='var(--c2)';
+    document.getElementById('hmNextBtn').style.display='block';
+    buildKeyboard();
+  }
+}
+
+function afterHangman(){
+  state.current++;
+  if(state.current>=state.total)showResults();
+  else{showScreen('game');renderQuestion();}
+}
+
+function showResults(){
+  showScreen('results');
+  const t1=state.t1,t2=state.t2;
+  const tie=t1.score===t2.score;
+  const winner=t1.score>t2.score?t1:t2;
+  const winColor=t1.score>t2.score?'var(--c1)':'var(--c4)';
+  document.getElementById('winnerBadge').textContent=tie?'Draw!':'Winner';
+  document.getElementById('winnerBadge').style.background=tie?'rgba(255,255,255,0.1)':(t1.score>t2.score?'rgba(255,107,43,0.15)':'rgba(6,214,160,0.15)');
+  document.getElementById('winnerBadge').style.color=tie?'var(--muted)':winColor;
+  document.getElementById('winnerTitle').textContent=tie?"It\'s a Tie!":winner.name+' Wins!';
+  document.getElementById('winnerTitle').style.color=tie?'var(--text)':winColor;
+  document.getElementById('winnerSubtitle').textContent=tie?'Great battle from both teams!':`Congrats, ${winner.players}!`;
+  document.getElementById('fs1-name').textContent=t1.name;
+  document.getElementById('fs1-players').textContent=t1.players;
+  document.getElementById('fs1-score').textContent=t1.score;
+  document.getElementById('fs2-name').textContent=t2.name;
+  document.getElementById('fs2-players').textContent=t2.players;
+  document.getElementById('fs2-score').textContent=t2.score;
+  if(!tie)document.getElementById(t1.score>t2.score?'fs1':'fs2').classList.add('winner-card');
+  document.getElementById('statRounds').textContent=state.rounds;
+  document.getElementById('statCorrect').textContent=state.correctCount;
+  const acc=state.trivaTotal>0?Math.round(state.correctCount/state.trivaTotal*100):0;
+  document.getElementById('statAccuracy').textContent=acc+'%';
+}
+
+buildCatsGrid();
+</script>
